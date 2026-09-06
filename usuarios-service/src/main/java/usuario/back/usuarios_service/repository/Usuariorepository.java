@@ -5,7 +5,7 @@ import usuario.back.usuarios_service.model.Usuario;
 
 import java.util.Optional;
 
-public interface Usuariorepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByCorreo(String correo);
 

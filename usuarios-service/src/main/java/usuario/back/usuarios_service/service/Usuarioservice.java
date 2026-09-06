@@ -5,18 +5,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import usuario.back.usuarios_service.exception.DatosInvalidosException;
 import usuario.back.usuarios_service.exception.RecursoNoEncontradoException;
-import usuario.back.usuarios_service.model.Tipousuario;
+import usuario.back.usuarios_service.model.TipoUsuario;
 import usuario.back.usuarios_service.model.Usuario;
-import usuario.back.usuarios_service.repository.Usuariorepository;
+import usuario.back.usuarios_service.repository.UsuarioRepository;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class Usuarioservice {
+public class UsuarioService {
 
-    private final Usuariorepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
     // BCrypt cifra la contraseña; nunca se guarda en texto plano.
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -61,7 +61,7 @@ public class Usuarioservice {
         }
 
         usuario.setPasswordHash(passwordEncoder.encode(passwordPlano));
-        usuario.setTipo(Tipousuario.CLIENTE); // el tipo solo se puede editar desde el admin, nunca al registrarse
+        usuario.setTipo(TipoUsuario.CLIENTE); // el tipo solo se puede editar desde el admin, nunca al registrarse
         return usuarioRepository.save(usuario);
     }
 
@@ -89,7 +89,7 @@ public class Usuarioservice {
     }
 
     /** Solo el admin puede llamar esto: cambia el rol de un usuario existente. */
-    public Usuario cambiarTipo(Long id, Tipousuario nuevoTipo) {
+    public Usuario cambiarTipo(Long id, TipoUsuario nuevoTipo) {
         Usuario existente = buscarPorId(id);
         existente.setTipo(nuevoTipo);
         return usuarioRepository.save(existente);
