@@ -1,6 +1,6 @@
 package usuario.back.usuarios_service.controller;
 
-import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
