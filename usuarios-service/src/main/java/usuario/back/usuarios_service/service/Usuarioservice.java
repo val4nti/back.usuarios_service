@@ -18,10 +18,8 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
 
-    // BCrypt cifra la contraseña; nunca se guarda en texto plano.
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // Dominios de correo permitidos, según la especificación del caso.
     private static final Pattern CORREO_PERMITIDO = Pattern.compile(
             "^[^\\s@]+@(duoc\\.cl|profesor\\.duoc\\.cl|gmail\\.com)$", Pattern.CASE_INSENSITIVE);
 
@@ -39,13 +37,6 @@ public class UsuarioService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ese correo."));
     }
 
-    /**
-     * Registra un nuevo usuario (rol CLIENTE por defecto). Valida:
-     * - dominio del correo permitido
-     * - correo y RUN no repetidos
-     * - RUN con dígito verificador válido
-     * - cifra la contraseña antes de guardar
-     */
     public Usuario registrar(Usuario usuario, String passwordPlano) {
         validarCorreoPermitido(usuario.getCorreo());
         validarRun(usuario.getRun());
@@ -61,14 +52,12 @@ public class UsuarioService {
         }
 
         usuario.setPasswordHash(passwordEncoder.encode(passwordPlano));
-        usuario.setTipo(TipoUsuario.CLIENTE); // el tipo solo se puede editar desde el admin, nunca al registrarse
+        usuario.setTipo(TipoUsuario.CLIENTE);
         return usuarioRepository.save(usuario);
     }
 
-    /** Usado por el admin para crear usuarios con cualquier rol (Vendedor/Administrador). */
     public Usuario crearComoAdmin(Usuario usuario, String passwordPlano) {
         Usuario creado = registrar(usuario, passwordPlano);
-        // registrar() fuerza CLIENTE; si el admin pidió otro rol, se sobreescribe aquí.
         if (usuario.getTipo() != null) {
             creado.setTipo(usuario.getTipo());
             usuarioRepository.save(creado);
@@ -84,11 +73,9 @@ public class UsuarioService {
         existente.setRegion(datos.getRegion());
         existente.setComuna(datos.getComuna());
         existente.setDireccion(datos.getDireccion());
-        // El tipo (rol) solo se cambia explícitamente por el admin, en su propio endpoint.
         return usuarioRepository.save(existente);
     }
 
-    /** Solo el admin puede llamar esto: cambia el rol de un usuario existente. */
     public Usuario cambiarTipo(Long id, TipoUsuario nuevoTipo) {
         Usuario existente = buscarPorId(id);
         existente.setTipo(nuevoTipo);
@@ -100,7 +87,6 @@ public class UsuarioService {
         usuarioRepository.delete(existente);
     }
 
-    /** Verifica correo + contraseña para el login. Se usará desde el AuthController más adelante. */
     public Usuario validarCredenciales(String correo, String passwordPlano) {
         Usuario usuario = buscarPorCorreo(correo);
         if (!passwordEncoder.matches(passwordPlano, usuario.getPasswordHash())) {
@@ -116,10 +102,6 @@ public class UsuarioService {
         }
     }
 
-    /**
-     * Valida el dígito verificador del RUN chileno (algoritmo módulo 11).
-     * Formato esperado: sin puntos ni guion, ej. "19011022K".
-     */
     private void validarRun(String run) {
         if (run == null || !run.matches("\\d{6,8}[0-9kK]")) {
             throw new DatosInvalidosException("El RUN debe tener entre 7 y 9 caracteres, sin puntos ni guion.");

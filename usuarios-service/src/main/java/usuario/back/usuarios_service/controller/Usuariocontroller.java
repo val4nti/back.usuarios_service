@@ -17,16 +17,12 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-
-    // Público: cualquier persona puede registrarse como CLIENTE.
+    
     @PostMapping("/registro")
     @ResponseStatus(HttpStatus.CREATED)
-    public Usuario registrar(@Valid @RequestBody RegistroUsuarioRequest request) {
-        return usuarioService.registrar(request.aUsuario(), request.getPassword());
+    public Usuario registrar(@RequestBody Usuario usuario) {
+        return usuarioService.registrar(usuario, usuario.getPassword());
     }
-
-    // El resto de endpoints, en la práctica, se restringen por rol cuando
-    // agreguemos Spring Security + JWT. Por ahora quedan abiertos para probar.
 
     @GetMapping
     public List<Usuario> listar() {
@@ -39,11 +35,10 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public Usuario actualizar(@PathVariable Long id, @Valid @RequestBody Usuario datos) {
+    public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario datos) {
         return usuarioService.actualizar(id, datos);
     }
 
-    // Solo admin (se restringirá con JWT más adelante): cambia el rol de un usuario.
     @PatchMapping("/{id}/tipo")
     public Usuario cambiarTipo(@PathVariable Long id, @RequestParam TipoUsuario tipo) {
         return usuarioService.cambiarTipo(id, tipo);
