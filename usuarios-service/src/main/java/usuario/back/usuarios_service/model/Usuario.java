@@ -56,7 +56,7 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private TipoUsuario tipo;
+    private Tipousuario tipo;
 
     // Opcional según la especificación.
     private LocalDate fechaNacimiento;
